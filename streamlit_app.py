@@ -1,4 +1,3 @@
-
 # oz_lotto_hybrid_predictor.py
 import streamlit as st
 import numpy as np
@@ -34,11 +33,11 @@ def fourier_score(freqs):
 
 def hot_zone_score(freqs):
     zone_thresh = np.percentile(freqs, 75)
-    return (freqs >= zone_thresh).astype(int)
+    return pd.Series((freqs >= zone_thresh).astype(int), index=freqs.index)
 
 def cold_zone_score(freqs):
     zone_thresh = np.percentile(freqs, 25)
-    return (freqs <= zone_thresh).astype(int)
+    return pd.Series((freqs <= zone_thresh).astype(int), index=freqs.index)
 
 def sequential_penalty(numbers):
     numbers = sorted(numbers)
@@ -61,11 +60,13 @@ def mahalanobis_distance(numbers, historical_matrix):
 # ----- Prediction Generators ----- #
 def generate_mode_c_predictions():
     predictions = []
+    hot_scores = hot_zone_score(historical_freq)
+    cold_scores = cold_zone_score(historical_freq)
     for _ in range(NUM_SETS):
         scores = historical_freq.copy()
         scores += np.random.randn(47) * 0.5
-        scores += hot_zone_score(historical_freq) * 1.5
-        scores -= cold_zone_score(historical_freq) * 0.5
+        scores += hot_scores * 1.5
+        scores -= cold_scores * 0.5
         probs = scores / scores.sum()
         mains = np.random.choice(NUMBERS_RANGE, size=NUM_MAIN, replace=False, p=probs)
         remaining = list(set(NUMBERS_RANGE) - set(mains))
@@ -74,12 +75,14 @@ def generate_mode_c_predictions():
     return predictions
 
 def evaluate_final_formula(predictions, historical_matrix):
+    hot_scores = hot_zone_score(historical_freq)
+    cold_scores = cold_zone_score(historical_freq)
     scored = []
     for entry in predictions:
         mains = entry[:NUM_MAIN]
         F = np.mean([historical_freq[n]/historical_freq.sum() for n in mains])
-        H = np.mean([hot_zone_score(historical_freq)[n-1] for n in mains])
-        C = np.mean([cold_zone_score(historical_freq)[n-1] for n in mains])
+        H = np.mean([hot_scores[n] for n in mains])
+        C = np.mean([cold_scores[n] for n in mains])
         S = sequential_penalty(mains)
         E = entropy_score(mains)
         M = mahalanobis_distance(mains, historical_matrix)
