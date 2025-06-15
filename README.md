@@ -1,44 +1,33 @@
-# 🧠 Big Win Ozz Lotto – Hybrid Prediction Engine
 
-This is a powerful Streamlit-based app for predicting Oz Lotto outcomes using:
-- Statistical filters (entropy, hot/cold zones, Fourier)
-- Hybrid scoring formula (with adjustable weights α, β, γ)
-- Optional Machine Learning integration (LightGBM / Random Forest)
-- Support for supplementary numbers
-- Upload historical data for full feature engineering and real-time prediction
+# 🧠 Big Win Oz Lotto – Hybrid Predictor App
 
-## 🚀 Features
+This Streamlit app predicts Oz Lotto numbers using a hybrid mathematical formula and optionally applies a machine learning model for enhanced prediction accuracy.
 
-- Upload and persist historical draw data (`.csv`)
-- Generate 7 + 2 number sets using smart weighted formula
-- Score predictions using entropy, gap spacing, and Mahalanobis distance
-- Load and apply a trained machine learning model (`oz_lotto_model.pkl`)
-- Visualize and download the top 10 predictions
+## 🔧 Features
+- Upload your own historical draw data (.csv)
+- Upload a trained ML model (.pkl, e.g., RandomForest or LightGBM)
+- Adjust prediction formula weights in real time:
+  - Alpha: Frequency weight
+  - Beta: Hot zone score
+  - Gamma: Cold number bonus
+- Predicts 7 main numbers and 2 supplementary numbers
+- Scores predictions with:
+  - Hybrid scoring formula
+  - Optional ML model scoring
+- Exports top predictions as downloadable CSV
 
-## 🧪 ML Model Support
+## 📁 Files
+- `oz_lotto_hybrid_predictor.py`: Streamlit app
+- `requirements.txt`: Required dependencies
+- `README.md`: This file
 
-To train your own `.pkl` model:
-```
-python train_oz_lotto_model.py
-```
+## 🚀 Getting Started
 
-## 📦 Requirements
-
-Install using:
-```
+```bash
 pip install -r requirements.txt
-```
-
-## ▶️ Run Locally
-
-```
 streamlit run oz_lotto_hybrid_predictor.py
 ```
 
-## 🌐 Deploy on Streamlit Cloud
+## 📤 Deploy on Streamlit Cloud
+Upload the repo and use Streamlit Cloud to launch it online. Upload your own historical draws and model during runtime!
 
-Push this to GitHub and deploy directly from:
-[https://streamlit.io/cloud](https://streamlit.io/cloud)
-
----
-Crafted with 🎯 by ChatGPT and [Your Name]
