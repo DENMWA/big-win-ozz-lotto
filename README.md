@@ -1,20 +1,44 @@
-# Big Win Ozz Lotto 🎯
+# 🧠 Big Win Ozz Lotto – Hybrid Prediction Engine
 
-A Streamlit-based app that predicts 7 main numbers and 2 supplementary numbers for Oz Lotto using statistical modeling and entropy scoring.
+This is a powerful Streamlit-based app for predicting Oz Lotto outcomes using:
+- Statistical filters (entropy, hot/cold zones, Fourier)
+- Hybrid scoring formula (with adjustable weights α, β, γ)
+- Optional Machine Learning integration (LightGBM / Random Forest)
+- Support for supplementary numbers
+- Upload historical data for full feature engineering and real-time prediction
 
-## Features
-- Predicts 7 main numbers + 2 supps from 1–47
-- Tunable weights for frequency, hot zone, cold zone factors
-- Entropy and Mahalanobis scoring
-- Downloadable top-10 ranked sets
+## 🚀 Features
 
-## Run Locally
-```bash
-pip install -r requirements.txt
-streamlit run streamlit_app.py
+- Upload and persist historical draw data (`.csv`)
+- Generate 7 + 2 number sets using smart weighted formula
+- Score predictions using entropy, gap spacing, and Mahalanobis distance
+- Load and apply a trained machine learning model (`oz_lotto_model.pkl`)
+- Visualize and download the top 10 predictions
+
+## 🧪 ML Model Support
+
+To train your own `.pkl` model:
+```
+python train_oz_lotto_model.py
 ```
 
-## Deploy to Streamlit Cloud
-1. Push to GitHub
-2. Connect on [streamlit.io/cloud](https://streamlit.io/cloud)
-3. Set `streamlit_app.py` as main entry point
+## 📦 Requirements
+
+Install using:
+```
+pip install -r requirements.txt
+```
+
+## ▶️ Run Locally
+
+```
+streamlit run oz_lotto_hybrid_predictor.py
+```
+
+## 🌐 Deploy on Streamlit Cloud
+
+Push this to GitHub and deploy directly from:
+[https://streamlit.io/cloud](https://streamlit.io/cloud)
+
+---
+Crafted with 🎯 by ChatGPT and [Your Name]
