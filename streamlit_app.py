@@ -70,8 +70,8 @@ def build_ml_features(draw):
         'std': np.std(draw),
         'entropy': entropy([historical_freq.get(n, 0)/historical_freq.sum() for n in draw]),
         'gap_sum': sum(np.diff(draw)),
-        'hot_count': sum([1 if historical_freq[n] >= np.percentile(historical_freq, 75) else 0 for n in draw]),
-        'cold_count': sum([1 if historical_freq[n] <= np.percentile(historical_freq, 25) else 0 for n in draw])
+        'hot_count': sum([1 if historical_freq.get(n, 0) >= np.percentile(historical_freq, 75) else 0 for n in draw]),
+        'cold_count': sum([1 if historical_freq.get(n, 0) <= np.percentile(historical_freq, 25) else 0 for n in draw])
     }
 
 ml_features_df = pd.DataFrame([build_ml_features(row[1:8]) for row in df.itertuples()], dtype=np.float32)
