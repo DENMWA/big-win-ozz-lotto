@@ -1,3 +1,4 @@
+
 # oz_lotto_hybrid_predictor.py
 import streamlit as st
 import numpy as np
@@ -7,22 +8,19 @@ from scipy.spatial import distance
 import joblib
 import os
 
-# ----- Constants and Configs ----- #
-NUMBERS_RANGE = list(range(1, 48))  # Oz Lotto: 1 to 47
+NUMBERS_RANGE = list(range(1, 48))
 NUM_MAIN = 7
 NUM_SUPP = 2
 NUM_SETS = 100
 
-# ----- User Input Weights ----- #
 st.sidebar.header("Weight Adjustment (Final Formula)")
 alpha = st.sidebar.slider("Alpha – Frequency Weight", 0.0, 2.0, 1.0, 0.1)
 beta = st.sidebar.slider("Beta – Hot Zone Weight", 0.0, 2.0, 1.0, 0.1)
 gamma = st.sidebar.slider("Gamma – Cold Zone Weight", 0.0, 2.0, 1.0, 0.1)
 
-st.title("🧠 Oz Lotto Hybrid Predictor with Supplementaries + Optional ML Model")
+st.title("🧠 Oz Lotto Hybrid Predictor with Supplementaries + ML Model")
 st.markdown("---")
 
-# ----- Upload Historical Data & Optional ML Model ----- #
 st.markdown("### 📂 Upload Files")
 st.markdown("**Required:** Historical CSV with at least 7 main number columns")
 
@@ -70,7 +68,7 @@ def build_ml_features(draw):
     return {
         'mean': np.mean(draw),
         'std': np.std(draw),
-        'entropy': entropy([historical_freq[n]/historical_freq.sum() for n in draw]),
+        'entropy': entropy([historical_freq.get(n, 0)/historical_freq.sum() for n in draw]),
         'gap_sum': sum(np.diff(draw)),
         'hot_count': sum([1 if historical_freq[n] >= np.percentile(historical_freq, 75) else 0 for n in draw]),
         'cold_count': sum([1 if historical_freq[n] <= np.percentile(historical_freq, 25) else 0 for n in draw])
@@ -79,7 +77,6 @@ def build_ml_features(draw):
 ml_features_df = pd.DataFrame([build_ml_features(row[1:8]) for row in df.itertuples()], dtype=np.float32)
 st.write("📊 Sample ML Features", ml_features_df.head())
 
-# Load ML model and score predictions
 try:
     model = joblib.load(model_path)
     st.success("🧠 Machine Learning Model Loaded")
@@ -87,7 +84,6 @@ except:
     model = None
     st.warning("⚠️ ML model not found or failed to load.")
 
-# ----- Formula Components ----- #
 def hot_zone_score(freqs):
     zone_thresh = np.percentile(freqs, 75)
     return pd.Series((freqs >= zone_thresh).astype(int), index=freqs.index)
@@ -114,7 +110,6 @@ def mahalanobis_distance(numbers, historical_matrix):
     except:
         return 0
 
-# ----- Prediction Generators ----- #
 def generate_mode_c_predictions():
     predictions = []
     hot_scores = hot_zone_score(historical_freq)
@@ -138,8 +133,8 @@ def evaluate_final_formula(predictions, historical_matrix):
     for entry in predictions:
         mains = entry[:NUM_MAIN]
         F = np.mean([historical_freq[n]/historical_freq.sum() for n in mains])
-        H = np.mean([hot_scores[n] for n in mains])
-        C = np.mean([cold_scores[n] for n in mains])
+        H = np.mean([hot_scores.get(n, 0) for n in mains])
+        C = np.mean([cold_scores.get(n, 0) for n in mains])
         S = sequential_penalty(mains)
         E = entropy_score(mains)
         M = mahalanobis_distance(mains, historical_matrix)
@@ -148,7 +143,6 @@ def evaluate_final_formula(predictions, historical_matrix):
     scored.sort(key=lambda x: x[1], reverse=True)
     return scored
 
-# ----- Simulate and Display ----- #
 st.subheader("🧪 Prediction Simulation")
 mode_c_preds = generate_mode_c_predictions()
 historical_matrix = [sorted(np.random.choice(NUMBERS_RANGE, NUM_MAIN, replace=False)) for _ in range(50)]
@@ -167,6 +161,5 @@ if model:
     top_df["ML Score"] = np.round(ml_scores, 3)
 
 st.dataframe(top_df)
-
 csv = top_df.to_csv(index=False).encode('utf-8')
 st.download_button("⬇ Download Top Predictions", csv, "oz_lotto_predictions.csv", "text/csv")
