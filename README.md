@@ -1,23 +1,18 @@
-# Big Win Ozz Lotto - ML Ready
+# Big Win Ozz Lotto Predictor 🎯
 
-This is a Streamlit-based predictive engine for Oz Lotto using a hybrid statistical + machine learning model.
+This is a predictive Streamlit application for Australia's Oz Lotto. Upload historical draw data and simulate new predictions based on a hybrid formula using frequency, hot/cold zones, entropy, and supplementary number generation.
 
 ## Features
-- Upload historical Oz Lotto data (CSV)
-- Auto-train LightGBM model from historical data
-- Generate top 10 number predictions (7 main + 2 supplementary)
-- Tune weights: frequency, hot zone, cold zone
-- Optional ML scoring (if model is trained)
-- Download top predictions as CSV
+- Upload your own CSV with historical draws
+- Adjustable weights for predictive modeling
+- Generates 100 sets of predictions
+- Includes supplementary number prediction
+- Downloadable results
 
-## Usage
-1. Run `streamlit run streamlit_app.py`
-2. Upload historical CSV
-3. Adjust weights
-4. View predictions and optionally train/score with ML
-
-## Requirements
-Install dependencies via:
+## Run the App
 ```bash
 pip install -r requirements.txt
+streamlit run streamlit_app.py
 ```
+
+Enjoy predicting your big win!
