@@ -1,4 +1,3 @@
-
 # oz_lotto_hybrid_predictor.py
 import streamlit as st
 import numpy as np
@@ -20,10 +19,10 @@ alpha = st.sidebar.slider("Alpha – Frequency Weight", 0.0, 2.0, 1.0, 0.1)
 beta = st.sidebar.slider("Beta – Hot Zone Weight", 0.0, 2.0, 1.0, 0.1)
 gamma = st.sidebar.slider("Gamma – Cold Zone Weight", 0.0, 2.0, 1.0, 0.1)
 
-st.title("🧠 Oz Lotto Hybrid Predictor with Supplementaries + ML Model")
+st.title("🧠 Oz Lotto Hybrid Predictor with Supplementaries + Optional ML Model")
 st.markdown("---")
 
-# ----- Upload Historical Data & ML Model ----- #
+# ----- Upload Historical Data & Optional ML Model ----- #
 st.markdown("### 📂 Upload Files")
 st.markdown("**Required:** Historical CSV with at least 7 main number columns")
 
@@ -115,6 +114,7 @@ def mahalanobis_distance(numbers, historical_matrix):
     except:
         return 0
 
+# ----- Prediction Generators ----- #
 def generate_mode_c_predictions():
     predictions = []
     hot_scores = hot_zone_score(historical_freq)
@@ -137,9 +137,9 @@ def evaluate_final_formula(predictions, historical_matrix):
     scored = []
     for entry in predictions:
         mains = entry[:NUM_MAIN]
-        F = np.mean([historical_freq.get(n, 0)/historical_freq.sum() for n in mains])
-        H = np.mean([hot_scores.get(n, 0) for n in mains])
-        C = np.mean([cold_scores.get(n, 0) for n in mains])
+        F = np.mean([historical_freq[n]/historical_freq.sum() for n in mains])
+        H = np.mean([hot_scores[n] for n in mains])
+        C = np.mean([cold_scores[n] for n in mains])
         S = sequential_penalty(mains)
         E = entropy_score(mains)
         M = mahalanobis_distance(mains, historical_matrix)
