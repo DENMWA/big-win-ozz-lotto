@@ -1,72 +1,42 @@
 
-# streamlit_app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
-import joblib
-from scipy.stats import entropy
-from scipy.spatial import distance
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
-st.title("🎯 Big Win Ozz Lotto Predictor")
-st.markdown("Upload your historical Oz Lotto data and simulate winning number predictions.")
+st.title("🎯 OzWinner Lotto Predictor with Live ML Training")
+st.markdown("Upload your historical Oz Lotto data and train a model directly inside this app.")
 
-# Config
-NUMBERS_RANGE = list(range(1, 48))
-NUM_MAIN = 7
-NUM_SUPP = 2
-NUM_SETS = 100
+uploaded_file = st.file_uploader("Upload Historical Data (.csv)", type=["csv"])
 
-# Sidebar controls
-st.sidebar.header("Weight Adjustment")
-alpha = st.sidebar.slider("Alpha – Frequency Weight", 0.0, 2.0, 1.0)
-beta = st.sidebar.slider("Beta – Hot Zone Weight", 0.0, 2.0, 1.0)
-gamma = st.sidebar.slider("Gamma – Cold Zone Weight", 0.0, 2.0, 1.0)
-
-# Upload historical data
-uploaded_file = st.file_uploader("Upload historical draw CSV (must include 7+ columns for main numbers)", type="csv")
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
-    if df.shape[1] < 7:
-        st.error("The file must contain at least 7 columns for main numbers.")
-        st.stop()
+    st.success("CSV file uploaded successfully!")
+    st.dataframe(df.head())
 
-    # Flatten all historical numbers to build frequency data
-    main_numbers = df.iloc[:, :7].values.flatten()
-    freq_series = pd.Series(main_numbers).value_counts().sort_index()
-    for n in NUMBERS_RANGE:
-        if n not in freq_series:
-            freq_series[n] = 0
-    freq_series = freq_series.sort_index()
-    st.bar_chart(freq_series)
+    # Basic feature engineering (example: even/odd counts)
+    st.markdown("### ✅ Extracting Features...")
+    features = df[[f'Winning Number {i}' for i in range(1, 8)]].values
+    labels = np.array([1 if 1 in row else 0 for row in features])
 
-    # Prediction logic
-    def generate_predictions():
-        hot_thresh = np.percentile(freq_series, 75)
-        cold_thresh = np.percentile(freq_series, 25)
-        hot_scores = (freq_series >= hot_thresh).astype(int)
-        cold_scores = (freq_series <= cold_thresh).astype(int)
+    X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=42)
 
-        predictions = []
-        for _ in range(NUM_SETS):
-            scores = freq_series.copy()
-            scores += np.random.randn(len(scores)) * 0.5
-            scores += beta * hot_scores
-            scores -= gamma * cold_scores
-            probs = scores / scores.sum()
-            mains = np.random.choice(NUMBERS_RANGE, size=NUM_MAIN, replace=False, p=probs)
-            remaining = list(set(NUMBERS_RANGE) - set(mains))
-            supps = np.random.choice(remaining, size=NUM_SUPP, replace=False)
-            predictions.append(sorted(mains) + sorted(supps))
-        return predictions
+    if st.button("🚀 Train Model"):
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
 
-    # Generate and display
-    st.subheader("🔮 Top Predictions")
-    predictions = generate_predictions()
-    top_df = pd.DataFrame(predictions, columns=[f"N{i+1}" for i in range(NUM_MAIN + NUM_SUPP)])
-    st.dataframe(top_df)
+        st.success(f"✅ Model trained successfully with accuracy: {accuracy:.2f}")
 
-    # Download
-    csv = top_df.to_csv(index=False).encode('utf-8')
-    st.download_button("⬇ Download Predictions", csv, "oz_lotto_predictions.csv", "text/csv")
+        st.markdown("### 🎯 Predictions on New Random Draws")
+        for _ in range(5):
+            simulated = np.random.choice(range(1, 48), size=7, replace=False)
+            simulated = simulated.reshape(1, -1)
+            pred = model.predict(simulated)
+            st.write(f"Numbers: {simulated.flatten()} | Predicted Win-Likelihood: {pred[0]}")
+
 else:
-    st.warning("Please upload historical data to continue.")
+    st.warning("📥 Please upload a valid CSV file to begin.")
